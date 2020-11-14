@@ -29,7 +29,6 @@ public class GithubPorvider {
         return null;
     }
     public GithubUser getUser(String accessToken){
-        System.out.println(accessToken);
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .url("https://api.github.com/user")
