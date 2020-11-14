@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import java.nio.file.attribute.UserDefinedFileAttributeView;
 
 @Controller
@@ -25,18 +26,24 @@ public class AuthorizeController {
 
     @RequestMapping("/callback")
     public String callback(@RequestParam(name = "code") String code,
-                           @RequestParam(name = "state") String state){
+                           @RequestParam(name = "state") String state,
+                           HttpServletRequest request) {
         AccessTokenDto accessTokenDto = new AccessTokenDto();
         accessTokenDto.setClient_id(clientId);
         accessTokenDto.setClient_secret(clientSecret);
         accessTokenDto.setCode(code);
         accessTokenDto.setRedirect_uri(redirectUri);
         accessTokenDto.setState(state);
-        String token =  githubPorvider.getAccessToken(accessTokenDto);
+        String token = githubPorvider.getAccessToken(accessTokenDto);
         GithubUser user = githubPorvider.getUser(token);
-        System.out.println(user.getId());
-        System.out.println(user.getName());
-        System.out.println(user.getBio());
-        return "index";
+        if (user != null) {
+            //登录成功，写cookie和session
+            request.getSession().setAttribute("user",user);
+            return "redirect:/";
+        } else {
+            //登录失败，重新登录
+            return "redirect:/";
+        }
+
     }
 }
